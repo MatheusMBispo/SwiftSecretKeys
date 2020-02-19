@@ -19,13 +19,13 @@ brew install SwiftSecrets
 
 ## Getting Started
 
-To use this tool just type on terminal:
+Use this tool just type on terminal:
 
 ```bash
 swiftsecrets generate
 ```
 
-To use a especific generation factor, just use the flag "--factor"(Int) to set your custom factor:
+Use a specific generation factor, just use the flag "--factor"(Int) to set your custom factor:
 
 ```bash
 swiftsecrets generate -f 128
