@@ -2,7 +2,7 @@ import Foundation
 
 public struct Random {
     #if os(Linux)
-    static var initialized = false
+        static var initialized = false
     #endif
 
     public static func generate(_ upperBound: Int) -> Int {
@@ -23,7 +23,7 @@ public func randomText(_ length: Int, justLowerCase: Bool = false, whitespace: B
 
     while chars.count < length {
         let char = CharType.random(justLowerCase, whitespace).randomCharacter()
-        if char == 32 && (chars.last ?? 0) == char {
+        if char == 32, (chars.last ?? 0) == char {
             // do not allow two consecutive spaces
             continue
         }
@@ -32,7 +32,7 @@ public func randomText(_ length: Int, justLowerCase: Bool = false, whitespace: B
     return String(bytes: chars, encoding: .ascii)!
 }
 
-fileprivate enum CharType: Int {
+private enum CharType: Int {
     case LowerCase, UpperCase, Digit, Space
 
     func randomCharacter() -> UInt8 {

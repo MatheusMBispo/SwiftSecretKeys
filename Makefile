@@ -1,14 +1,17 @@
-#
-# Makefile
-#
-VERSION = snapshot
-GHRFLAGS =
-.PHONY: build release
-
-default: build
+prefix ?= /usr/local
+bindir = $(prefix)/bin
+libdir = $(prefix)/lib
 
 build:
-	goxc -d=pkg -pv=$(VERSION)
+	swift build -c release --disable-sandbox
 
-release:
-	ghr  -u MatheusMBispo  $(GHRFLAGS) v$(VERSION) pkg/$(VERSION)
+install: build
+	install ".build/release/SecretsSwift" "$(bindir)"
+
+uninstall:
+	rm -rf "$(bindir)/SecretsSwift"
+
+clean:
+	rm -rf .build
+
+.PHONY: build install uninstall clean
