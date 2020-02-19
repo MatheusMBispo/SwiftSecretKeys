@@ -46,9 +46,9 @@ You can use this parameters to configure your **swiftsecrets**:
 ```yaml
 output: Folder/Secrets.swift ## Filename (with path)
 keys: ## Local keys
-	example: value 
+ example: value 
 environments: ## Environment keys, you must to set on your environment with the same name
-	- EXAMPLE ## By example, type on your terminal: "export EXAMPLE=value"
-	- EXAMPLE2
+ - EXAMPLE ## By example, type on your terminal: "export EXAMPLE=value"
+ - EXAMPLE2
 ```
 
