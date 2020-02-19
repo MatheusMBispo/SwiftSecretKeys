@@ -4,22 +4,24 @@
 import PackageDescription
 
 let package = Package(
-    name: "SecretsSwift",
+    name: "swiftsecrets",
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.13.1"),
         .package(url: "https://github.com/jakeheis/SwiftCLI", from: "6.0.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "2.0.0"),
+        .package(url: "https://github.com/kareman/SwiftShell", from: "5.0.1"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
-            name: "SecretsSwift",
+            name: "swiftsecrets",
             dependencies: [
                 "Stencil",
                 "SwiftCLI",
                 "Yams",
+                "SwiftShell",
             ]
         ),
     ]

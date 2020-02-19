@@ -1,5 +1,5 @@
 import SwiftCLI
 
-let generator = CLI(name: "secrets")
+let generator = CLI(name: "swiftsecrets")
 generator.commands = [GenerateCommand()]
 generator.go()

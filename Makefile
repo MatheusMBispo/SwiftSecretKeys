@@ -6,10 +6,10 @@ build:
 	swift build -c release --disable-sandbox
 
 install: build
-	install ".build/release/SecretsSwift" "$(bindir)"
+	install ".build/release/swiftsecrets" "$(bindir)"
 
 uninstall:
-	rm -rf "$(bindir)/SecretsSwift"
+	rm -rf "$(bindir)/swiftsecrets"
 
 clean:
 	rm -rf .build

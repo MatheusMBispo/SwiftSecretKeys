@@ -1,5 +1,6 @@
 import Foundation
 import Stencil
+import SwiftShell
 
 enum GeneratorError: Error {
     case invalidEnvironmentVariable
@@ -9,11 +10,16 @@ class Generator {
     let values: [String: String]
     let outputPath: String
     let environment: [String]
+    let customFactor: Int
 
-    init(values: [String: String], environment: [String], outputPath: String) {
+    init(values: [String: String],
+         environment: [String],
+         outputPath: String,
+         customFactor: Int) {
         self.values = values
         self.outputPath = outputPath
         self.environment = environment
+        self.customFactor = customFactor
     }
 
     func chunked(array: [UInt8], into size: Int) -> [[UInt8]] {
@@ -36,7 +42,7 @@ class Generator {
     }
 
     func generate() throws {
-        let salt = randomText(32)
+        let salt = randomText(customFactor)
         let cipher = salt.data(using: .utf8)!.bytes
         let salt_chunks = chunked(array: cipher, into: 10)
 
@@ -64,13 +70,13 @@ class Generator {
         do {
             let rendered = try environment.renderTemplate(string: template, context: context)
 
-            let dir = FileManager.default.currentDirectoryPath + "/" + outputPath
+            let dir = main.currentdirectory + "/" + outputPath
             let fileURL = URL(fileURLWithPath: dir)
 
             try rendered.write(to: fileURL, atomically: false, encoding: .utf8)
         }
         catch {
-            print("The desired file could not be generated.")
+            print("The desired file could not be generated (Wrong output path).")
         }
     }
 
