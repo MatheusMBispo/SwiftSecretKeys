@@ -12,5 +12,6 @@ uninstall:
 
 clean:
 	rm -rf .build
+	rm -rf *.xcodeproj
 
 .PHONY: build install uninstall clean

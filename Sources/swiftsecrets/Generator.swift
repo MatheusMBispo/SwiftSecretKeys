@@ -9,16 +9,13 @@ enum GeneratorError: Error {
 class Generator {
     let values: [String: String]
     let outputPath: String
-    let environment: [String]
     let customFactor: Int
 
     init(values: [String: String],
-         environment: [String],
          outputPath: String,
          customFactor: Int) {
         self.values = values
         self.outputPath = outputPath
-        self.environment = environment
         self.customFactor = customFactor
     }
 
@@ -52,19 +49,11 @@ class Generator {
             configs.append(Config(name: key, value: chunked(array: encodedVar, into: 10)))
         }
 
-        var environments = [Config]()
-        for value in environment {
-            guard let environmentValue = ProcessInfo.processInfo.environment[value] else { throw GeneratorError.invalidEnvironmentVariable }
-            let encodedVar = encode(environmentValue, cipher: cipher)
-            environments.append(Config(name: value, value: chunked(array: encodedVar, into: 10)))
-        }
-
         let loader = FileSystemLoader(bundle: [Bundle.main])
         let environment = Environment(loader: loader)
         let context: [String: Any] = [
             "salt_chunks": salt_chunks,
-            "vars": configs,
-            "environments": environments
+            "vars": configs
         ]
 
         do {
@@ -89,14 +78,6 @@ class Generator {
      ]{% for var in vars %}
      static var {{ var.name }}: String {
          let encoded: [UInt8] = [{% for encoded_chunk in var.value %}
-            {% for encoded in encoded_chunk %}{{ encoded }}, {% endfor %}{% endfor %}
-         ]
-         return decode(encoded, cipher: salt)
-     }
-     {% endfor %}
-     {% for environment in environments %}
-     static var {{ environment.name }}: String {
-         let encoded: [UInt8] = [{% for encoded_chunk in environment.value %}
             {% for encoded in encoded_chunk %}{{ encoded }}, {% endfor %}{% endfor %}
          ]
          return decode(encoded, cipher: salt)

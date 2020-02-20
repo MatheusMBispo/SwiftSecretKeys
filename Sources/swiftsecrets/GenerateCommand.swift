@@ -1,4 +1,5 @@
 import Foundation
+import Regex
 import SwiftCLI
 import SwiftShell
 import Yams
@@ -46,16 +47,43 @@ class GenerateCommand: Command {
 
         do {
             let secrets = try Yams.load(yaml: contents) as? [String: Any]
-            let values = secrets?["keys"] as? [String: String]
-            let environmentValues = secrets?["environments"] as? [String]
+            let keys = try readKeys(from: secrets)
             let output = secrets?["output"] as? String
-            let generator = Generator(values: values ?? [:],
-                                      environment: environmentValues ?? [],
+            let generator = Generator(values: keys,
                                       outputPath: output ?? "Secrets.swift", customFactor: factor ?? 32)
             try generator.generate()
         } catch {
             stdout <<< GenerateCommandError.invalidConfig.localizedDescription
             return
         }
+    }
+
+    func readKeys(from secrets: [String: Any]?) throws -> [String: String] {
+        guard let keys = secrets?["keys"] as? [String: String] else {
+            return [:]
+        }
+
+        var auxKeys = [String: String]()
+        for (key, value) in keys {
+            auxKeys[key] = try convertToRealValue(value)
+        }
+
+        return auxKeys
+    }
+
+    func convertToRealValue(_ value: String) throws -> String {
+        if isEnvironment(value) {
+            let filteredValue = value.replacingFirst(matching: "(\\$\\{)(\\w{1,})(\\})", with: "$2")
+            guard let environmentValue = ProcessInfo.processInfo.environment[filteredValue] else {
+                throw GeneratorError.invalidEnvironmentVariable
+            }
+            return environmentValue
+        } else {
+            return value
+        }
+    }
+
+    func isEnvironment(_ value: String) -> Bool {
+        return Regex("\\$\\{(\\w{1,})\\}").matches(value)
     }
 }
