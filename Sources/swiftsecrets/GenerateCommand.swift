@@ -45,17 +45,13 @@ class GenerateCommand: Command {
             return
         }
 
-        do {
-            let secrets = try Yams.load(yaml: contents) as? [String: Any]
-            let keys = try readKeys(from: secrets)
-            let output = secrets?["output"] as? String
-            let generator = Generator(values: keys,
-                                      outputPath: output ?? "Secrets.swift", customFactor: factor ?? 32)
-            try generator.generate()
-        } catch {
-            stdout <<< GenerateCommandError.invalidConfig.localizedDescription
-            return
-        }
+        let secrets = try Yams.load(yaml: contents) as? [String: Any]
+        let keys = try readKeys(from: secrets)
+        let output = secrets?["output"] as? String
+        let generator = Generator(values: keys,
+                                  outputPath: output ?? "",
+                                  customFactor: factor ?? 32)
+        try generator.generate()
     }
 
     func readKeys(from secrets: [String: Any]?) throws -> [String: String] {

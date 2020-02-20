@@ -14,4 +14,8 @@ clean:
 	rm -rf .build
 	rm -rf *.xcodeproj
 
+project:
+	swift package generate-xcodeproj
+	open *.xcodeproj
+
 .PHONY: build install uninstall clean

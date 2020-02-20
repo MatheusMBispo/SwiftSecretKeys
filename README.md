@@ -1,54 +1,97 @@
+<img src="https://pngimage.net/wp-content/uploads/2018/06/secure-icon-png-6.png" alt="logo" style="zoom:25%;" />
+
 # Swift Secrets
 
-Command line tool that generates obfuscated keys file to your Swift project.
+Swift Secrets is a command line tool written in Swift that generates obfuscated keys file to your Swift project using a configuration file (yml).
 
-* Installation
-* Getting Started
-* Configuration
+* ✅ Generate obfuscated keys using hexadecimal numbers.
+* ✅ Easily configuration using a yml file
+* ✅ Use a custom salt key size with **--factor** flag
+* ✅ Use **local** keys or **environment** keys
+* ✅ Generate from anywhere including on **CI**
+
+Given a very simple project spec file like this:
+
+```yaml
+output: Generated/Secrets.swift
+keys:
+	api: ${API}
+	bundle: br.com.teste
+```
 
 
 
-## Installation
+## Installing
+
+#### Homebrew
 
 ```shell
 brew tap MatheusMBispo/SwiftSecrets
 brew install SwiftSecrets
 ```
 
+#### Make
+
+```bash
+make install
+```
+
 
 
 ## Getting Started
 
-Use this tool just type on terminal:
+To use this tool just type on terminal:
 
 ```bash
 swiftsecrets generate
 ```
 
-Use a specific generation factor, just use the flag "--factor"(Int) to set your custom factor:
+To use a especific generation factor, just use the flag "--factor"(Int) to set your custom factor:
 
 ```bash
 swiftsecrets generate -f 128
 ```
 
+## Usage
+
+Simply run:
+
+```bash
+swiftsecrets generate
+```
+
+This will look for a configuration file in the current directory called ```SecretsConfig.yml``` and generate a file with the name defined in the **output** property in the config.
+
+Options:
+
+* **--config**: An optional path to a ```.yml``` configuration file. Defaults to ```SecretsConfig.yml```
+* **--factor**: An optional value to generate a salt key. Defaults to ```32```.
+
 
 
 ## Configuration
 
-Use a SecretsConfig.yml to configure your project by default. You can rename the configuration file to any other name using the "-c" or "--config" flag:
+The configuration file must be written in YAML.
 
-```bash
-swiftsecrets generate --config CustomConfig.yml
-```
-
-You can use this parameters to configure your **swiftsecrets**:
+#### Properties
 
 ```yaml
-output: Folder/Secrets.swift ## Filename (with path)
-keys: ## Local keys
- example: value 
-environments: ## Environment keys, you must to set on your environment with the same name
- - EXAMPLE ## By example, type on your terminal: "export EXAMPLE=value"
- - EXAMPLE2
+output: Generated/
+keys:
+	example: exampleValue
+	environmentExample: ${example} 
+```
+
+* **output: String** -  (Optional) Relative path to generate the ```Secrets.swift``` file.
+* **keys: [String: String]** -  (Optional) The keys that you want obfuscate. The dictionary key will be the variable name and the value will be obsfuscated.
+  * You can also use environment variables in your configuration file by using ```${VALUE}``` .
+
+## On Code:
+
+Using the example configuration file above, we can use the keys generated in our project like this:
+
+```swift
+let example = Secrets.example
+let x = Secrets.environmentExample
 ```
 

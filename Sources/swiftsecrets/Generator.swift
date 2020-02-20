@@ -59,7 +59,7 @@ class Generator {
         do {
             let rendered = try environment.renderTemplate(string: template, context: context)
 
-            let dir = main.currentdirectory + "/" + outputPath
+            let dir = main.currentdirectory + "/" + outputPath + "Secrets.swift"
             let fileURL = URL(fileURLWithPath: dir)
 
             try rendered.write(to: fileURL, atomically: false, encoding: .utf8)
