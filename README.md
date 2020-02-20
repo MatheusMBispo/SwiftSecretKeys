@@ -1,4 +1,4 @@
-<img src="https://pngimage.net/wp-content/uploads/2018/06/secure-icon-png-6.png" alt="logo" style="zoom:25%;" />
+<img src="https://pngimage.net/wp-content/uploads/2018/06/secure-icon-png-6.png" alt="logo" width="100" height="100" />
 
 # Swift Secrets
 
@@ -15,8 +15,8 @@ Given a very simple project spec file like this:
 ```yaml
 output: Generated/Secrets.swift
 keys:
-	api: ${API}
-	bundle: br.com.teste
+  api: ${API}
+  bundle: br.com.teste
 ```
 
 
@@ -78,8 +78,8 @@ The configuration file must be written in YAML.
 ```yaml
 output: Generated/
 keys:
-	example: exampleValue
-	environmentExample: ${example} 
+  example: exampleValue
+  environmentExample: ${example} 
 ```
 
 * **output: String** -  (Optional) Relative path to generate the ```Secrets.swift``` file.
