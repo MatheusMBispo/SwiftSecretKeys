@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "swiftsecrets",
+    products: [
+        .executable(name: "swiftsecrets", targets: ["swiftsecrets"]),
+    ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.13.1"),
