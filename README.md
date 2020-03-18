@@ -30,6 +30,12 @@ brew tap MatheusMBispo/SwiftSecrets
 brew install SwiftSecrets
 ```
 
+#### Mint
+
+```shell
+mint install MatheusMBispo/SwiftSecrets@0.2.0
+```
+
 #### Make
 
 ```bash
