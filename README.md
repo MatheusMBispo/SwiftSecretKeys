@@ -13,7 +13,7 @@ Swift Secrets is a command line tool written in Swift that generates obfuscated 
 Given a very simple project spec file like this:
 
 ```yaml
-output: Generated/Secrets.swift
+output: Generated/
 keys:
   api: ${API}
   bundle: br.com.teste
