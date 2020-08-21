@@ -38,6 +38,9 @@ mint install MatheusMBispo/SwiftSecretKeys@0.2.0
 make install
 ```
 
+### Binary
+You can download the executable from the link below:
+https://github.com/MatheusMBispo/SwiftSecretKeys/releases/download/0.3.0/sskeys
 
 ## Getting Started
 
