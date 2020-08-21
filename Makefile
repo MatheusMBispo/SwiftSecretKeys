@@ -11,6 +11,7 @@ uninstall:
 	rm -rf "$(bindir)/swiftsecrets"
 
 clean:
+	rm -rf .swiftspm
 	rm -rf .build
 	rm -rf *.xcodeproj
 

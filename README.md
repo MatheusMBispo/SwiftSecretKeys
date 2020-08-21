@@ -1,6 +1,6 @@
 <img src="https://pngimage.net/wp-content/uploads/2018/06/secure-icon-png-6.png" alt="logo" width="100" height="100" />
 
-# Swift Secrets
+# Swift Secret Keys
 
 Swift Secrets is a command line tool written in Swift that generates obfuscated keys file to your Swift project using a configuration file (yml).
 
@@ -19,29 +19,23 @@ keys:
   bundle: br.com.teste
 ```
 
+## Why use it
 
+The SwiftSecretKeys generates an obfuscated keys file for make it difficult to dump the contents of the decrypted binary and extract the keys. At runtime, the keys are unscrambled for use in your app.
 
 ## Installing
-
-#### Homebrew
-
-```shell
-brew tap MatheusMBispo/SwiftSecrets
-brew install SwiftSecrets
-```
 
 #### Mint
 
 ```shell
-mint install MatheusMBispo/SwiftSecrets@0.2.0
+mint install MatheusMBispo/SwiftSecretKeys@0.2.0
 ```
 
 #### Make
-
+Exports a executable to ```/bin``` folder
 ```bash
 make install
 ```
-
 
 
 ## Getting Started
@@ -49,13 +43,13 @@ make install
 To use this tool just type on terminal:
 
 ```bash
-swiftsecrets generate
+sskeys generate
 ```
 
 To use a especific generation factor, just use the flag "--factor"(Int) to set your custom factor:
 
 ```bash
-swiftsecrets generate -f 128
+sskeys generate -f 128
 ```
 
 ## Usage
@@ -63,14 +57,14 @@ swiftsecrets generate -f 128
 Simply run:
 
 ```bash
-swiftsecrets generate
+sskeys generate
 ```
 
-This will look for a configuration file in the current directory called ```SecretsConfig.yml``` and generate a file with the name defined in the **output** property in the config.
+This will look for a configuration file in the current directory called ```sskeys.yml``` and generate a file with the name defined in the **output** property in the config.
 
 Options:
 
-* **--config**: An optional path to a ```.yml``` configuration file. Defaults to ```SecretsConfig.yml```
+* **--config**: An optional path to a ```.yml``` configuration file. Defaults to ```sskeys.yml```
 * **--factor**: An optional value to generate a salt key. Defaults to ```32```.
 
 
@@ -88,7 +82,7 @@ keys:
   environmentExample: ${example} 
 ```
 
-* **output: String** -  (Optional) Relative path to generate the ```Secrets.swift``` file.
+* **output: String** -  (Optional) Relative path to generate the ```SecretKeys.swift``` file.
 * **keys: [String: String]** -  (Optional) The keys that you want obfuscate. The dictionary key will be the variable name and the value will be obsfuscated.
   * You can also use environment variables in your configuration file by using ```${VALUE}``` .
 
@@ -97,7 +91,16 @@ keys:
 Using the example configuration file above, we can use the keys generated in our project like this:
 
 ```swift
-let example = Secrets.example
-let x = Secrets.environmentExample
+let example = SecretKeys.example
+let x = SecretKeys.environmentExample
 ```
+
+## Other libraries
+
+There are also others obfuscation tools in the Swift and iOS community.
+
+* [CocoaPodsKeys](https://github.com/orta/cocoapods-keys)
+* [SwiftShield](https://github.com/rockbruno/swiftshield)
+* [Obfuscator](https://gist.github.com/DejanEnspyra/80e259e3c9adf5e46632631b49cd1007)
+
 

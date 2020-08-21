@@ -1,6 +1,6 @@
 import SwiftCLI
 import Regex
 
-let generator = CLI(name: "swiftsecrets")
+let generator = CLI(name: "sskeys")
 generator.commands = [GenerateCommand()]
-generator.go()
+_ = generator.go()
