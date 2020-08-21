@@ -59,7 +59,7 @@ class Generator {
         do {
             let rendered = try environment.renderTemplate(string: template, context: context)
 
-            let dir = main.currentdirectory + "/" + outputPath + "Secrets.swift"
+            let dir = main.currentdirectory + "/" + outputPath + "SecretKeys.swift"
             let fileURL = URL(fileURLWithPath: dir)
 
             try rendered.write(to: fileURL, atomically: false, encoding: .utf8)
@@ -72,7 +72,7 @@ class Generator {
     let template = """
     import Foundation
 
-    enum Secrets {
+    enum SecretKeys {
      private static let salt: [UInt8] = [{% for salt_chunk in salt_chunks %}
           {% for salt in salt_chunk %}{{ salt }}, {% endfor %}{% endfor %}
      ]{% for var in vars %}

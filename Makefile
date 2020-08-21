@@ -5,12 +5,13 @@ build:
 	swift build -c release --disable-sandbox
 
 install: build
-	install ".build/release/swiftsecrets" "$(bindir)"
+	install ".build/release/sskeys" "$(bindir)"
 
 uninstall:
-	rm -rf "$(bindir)/swiftsecrets"
+	rm -rf "$(bindir)/sskeys"
 
 clean:
+	rm -rf .swiftspm
 	rm -rf .build
 	rm -rf *.xcodeproj
 
