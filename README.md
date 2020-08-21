@@ -16,7 +16,7 @@ Given a very simple project spec file like this:
 output: Generated/
 keys:
   api: ${API}
-  bundle: br.com.teste
+  password: myPassword
 ```
 
 ## Why use it
@@ -32,7 +32,6 @@ mint install MatheusMBispo/SwiftSecretKeys@0.2.0
 ```
 
 #### Make
-Exports a executable to ```/bin``` folder
 ```bash
 make install
 ```
