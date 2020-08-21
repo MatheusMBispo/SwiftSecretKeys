@@ -98,6 +98,13 @@ let example = SecretKeys.example
 let x = SecretKeys.environmentExample
 ```
 
+## Uninstalling
+
+To uninstall you can remove the binary from the `/usr/local/bin` folder or execute the command below:
+```bash
+make uninstall
+```
+
 ## Other libraries
 
 There are also others obfuscation tools in the Swift and iOS community.
