@@ -30,7 +30,7 @@ The SwiftSecretKeys generates an obfuscated keys file for make it difficult to d
 #### Mint
 
 ```shell
-mint install MatheusMBispo/SwiftSecretKeys@0.2.0
+mint install MatheusMBispo/SwiftSecretKeys@0.4.0
 ```
 
 #### Make
