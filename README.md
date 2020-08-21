@@ -1,5 +1,7 @@
 <img src="https://pngimage.net/wp-content/uploads/2018/06/secure-icon-png-6.png" alt="logo" width="100" height="100" />
 
+![Swift](https://github.com/MatheusMBispo/SwiftSecretKeys/workflows/Swift/badge.svg)
+
 # Swift Secret Keys
 
 Swift Secrets is a command line tool written in Swift that generates obfuscated keys file to your Swift project using a configuration file (yml).
