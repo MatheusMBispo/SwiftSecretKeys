@@ -2,25 +2,25 @@ import Foundation
 
 public struct Random {
     #if os(Linux)
-        static var initialized = false
+    static var initialized = false
     #endif
-
+    
     public static func generate(_ upperBound: Int) -> Int {
         #if os(Linux)
-            if !Random.initialized {
-                srandom(UInt32(time(nil)))
-                Random.initialized = true
-            }
-            return Int(random() % upperBound)
+        if !Random.initialized {
+            srandom(UInt32(time(nil)))
+            Random.initialized = true
+        }
+        return Int(random() % upperBound)
         #else
-            return Int(arc4random_uniform(UInt32(upperBound)))
+        return Int(arc4random_uniform(UInt32(upperBound)))
         #endif
     }
 }
 
 public func randomText(_ length: Int, justLowerCase: Bool = false, whitespace: Bool = false) -> String {
     var chars = [UInt8]()
-
+    
     while chars.count < length {
         let char = CharType.random(justLowerCase, whitespace).randomCharacter()
         if char == 32, (chars.last ?? 0) == char {
@@ -34,7 +34,7 @@ public func randomText(_ length: Int, justLowerCase: Bool = false, whitespace: B
 
 private enum CharType: Int {
     case LowerCase, UpperCase, Digit, Space
-
+    
     func randomCharacter() -> UInt8 {
         switch self {
         case .LowerCase:
@@ -47,7 +47,7 @@ private enum CharType: Int {
             return 32
         }
     }
-
+    
     static func random(_ justLowerCase: Bool, _ allowWhitespace: Bool) -> CharType {
         if justLowerCase {
             return .LowerCase
