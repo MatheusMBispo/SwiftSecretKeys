@@ -11,7 +11,7 @@ enum GenerateCommandError: Error {
     var localizedDescription: String {
         switch self {
         case .notFoundConfig:
-            return "Error! Create a configuration file (SecretsConfig.yml) or set your custom path (--config)..."
+            return "Error! Create a configuration file (sskeys.yml) or set your custom path (--config)..."
         case .invalidConfig:
             return "Error! File cannot be generated (Verify the environments variables and the output path)..."
         }
@@ -20,7 +20,7 @@ enum GenerateCommandError: Error {
 
 class GenerateCommand: Command {
     let name = "generate"
-    var shortDescription: String = "Generate a file with secrets"
+    var shortDescription: String = "Generate a .swift file with secrets"
 
     @Key("-c", "--config", description: "Configuration file path")
     var config: String?
@@ -34,7 +34,7 @@ class GenerateCommand: Command {
         if let givenConfig = self.config {
             config = givenConfig
         } else {
-            config = "SecretsConfig.yml"
+            config = "sskeys.yml"
         }
         let path = main.currentdirectory + "/" + config
         let contents: String
