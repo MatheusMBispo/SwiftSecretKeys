@@ -40,7 +40,7 @@ make install
 
 ### Binary
 You can download the executable from the link below:
-https://github.com/MatheusMBispo/SwiftSecretKeys/releases/download/0.4.0/sskeys
+https://github.com/MatheusMBispo/SwiftSecretKeys/releases/download/
 
 ## Getting Started
 
