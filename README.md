@@ -35,6 +35,8 @@ mint install MatheusMBispo/SwiftSecretKeys@0.2.0
 
 #### Make
 ```bash
+git clone https://github.com/MatheusMBispo/SwiftSecretKeys.git
+cd SwiftSecretKeys
 make install
 ```
 
@@ -102,6 +104,8 @@ let x = SecretKeys.environmentExample
 
 To uninstall you can remove the binary from the `/usr/local/bin` folder or execute the command below:
 ```bash
+git clone https://github.com/MatheusMBispo/SwiftSecretKeys.git
+cd SwiftSecretKeys
 make uninstall
 ```
 
