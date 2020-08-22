@@ -21,6 +21,9 @@ keys:
   password: myPassword
 ```
 
+Take a look at this little article I wrote explaining a little more about this tool:
+https://link.medium.com/Tlg2WIrV88
+
 ## Why use it
 
 The SwiftSecretKeys generates an obfuscated keys file for make it difficult to dump the contents of the decrypted binary and extract the keys. At runtime, the keys are unscrambled for use in your app.
