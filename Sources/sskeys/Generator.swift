@@ -74,7 +74,7 @@ class Generator {
      ]{% for var in vars %}
      static var {{ var.name }}: String {
          let encoded: [UInt8] = [{% for encoded_chunk in var.value %}
-            {% for encoded in encoded_chunk %}{{ encoded }}, {% endfor %}{% endfor %}
+            {% for encoded in encoded_chunk %}{{ encoded }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if not forloop.last %},{% endif %}{% endfor %}
          ]
          return decode(encoded, cipher: salt)
      }
