@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** Secrets embedded in client apps are obfuscated at build time, making casual extraction impractical — while keeping the developer experience frictionless
-**Current focus:** Phase 12 — Developer Experience
+**Current focus:** Phase 13 — ChaCha20 Cipher
 
 ## Current Position
 
-Phase: 12 of 14 (Developer Experience)
-Plan: 2 of 2 in current phase
+Phase: 13 of 14 (ChaCha20 Cipher)
+Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-02-23 — Completed 12-02: --dry-run flag and version+timestamp header in generated output
+Last activity: 2026-02-23 — Completed 13-01: ChaCha20-Poly1305 cipher mode
 
-Progress: [████░░░░░░] 33%
+Progress: [█████░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 3 min
 - Total execution time: 0.2 hours
 
@@ -29,9 +29,10 @@ Progress: [████░░░░░░] 33%
 |-------|-------|-------|----------|
 | 11-infrastructure-hardening | 3 | 10 min | 3 min |
 | 12-developer-experience | 2 | 4 min | 2 min |
+| 13-chacha20-cipher | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 11-01 (5 min), 11-02 (3 min), 11-03 (2 min), 12-01 (2 min), 12-02 (2 min)
+- Last 5 plans: 11-03 (2 min), 12-01 (2 min), 12-02 (2 min), 13-01 (2 min)
 - Trend: steady
 
 *Updated after each plan completion*
@@ -58,6 +59,9 @@ Recent decisions affecting current work:
 - [12-02]: Version constant isolated in Version.swift enum for single authoritative source — bumped manually on each release, never derived at runtime
 - [12-02]: dryRun early-return placed after rendered string is produced but before outputURL resolution — file I/O completely skipped, not just the write call
 - [12-02]: stdout carries only generated Swift code in dry-run mode — meta-messages suppressed at GenerateCommand level so piping works cleanly
+- [13-01]: ChaChaPoly.SealedBox.combined returns non-optional Data (unlike AES-GCM) — Array() directly, no guard-let required
+- [13-01]: No new SPM dependencies — ChaChaPoly already available via existing swift-crypto 4.2.0 dependency
+- [13-01]: ChaCha20 CI compile-check gated inside Darwin block alongside AES-GCM (both require CryptoKit SDK)
 
 ### Pending Todos
 
@@ -70,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 12-02-PLAN.md — --dry-run flag and version+timestamp header in generated output
+Stopped at: Completed 13-01-PLAN.md — ChaCha20-Poly1305 cipher mode
 Resume file: None
