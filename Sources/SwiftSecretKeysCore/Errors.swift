@@ -10,6 +10,7 @@ public enum SSKeysError: LocalizedError, Equatable {
     case keyNameCollision(names: [String], sanitized: String)
     case invalidCipher(value: String)
     case encryptionFailed(reason: String)
+    case dotEnvFileNotFound(path: String)
 
     public var errorDescription: String? {
         switch self {
@@ -31,6 +32,8 @@ public enum SSKeysError: LocalizedError, Equatable {
             return "Unknown cipher '\(value)'. Supported values: 'xor', 'aes-gcm'."
         case let .encryptionFailed(reason):
             return "Encryption failed: \(reason)"
+        case let .dotEnvFileNotFound(path):
+            return "Environment file not found at '\(path)'."
         }
     }
 }
