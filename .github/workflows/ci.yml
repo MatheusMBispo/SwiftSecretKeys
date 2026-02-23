@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: swift-actions/setup-swift@v3
+        with:
+          swift-version: "6.0"
+      - name: Build
+        run: swift build
+      - name: Test with coverage
+        run: swift test --enable-code-coverage
+      - name: Report coverage
+        run: |
+          BIN_PATH=$(swift build --show-bin-path)
+          XCTEST_PATH=$(find "$BIN_PATH" -name '*.xctest' | head -1)
+          if [[ "$(uname)" == "Darwin" ]]; then
+            COV_BIN="$XCTEST_PATH/Contents/MacOS/$(basename "$XCTEST_PATH" .xctest)"
+            LLVM_COV="xcrun llvm-cov"
+          else
+            COV_BIN="$XCTEST_PATH"
+            LLVM_COV="llvm-cov"
+          fi
+          $LLVM_COV report \
+            "$COV_BIN" \
+            -instr-profile=.build/debug/codecov/default.profdata \
+            -ignore-filename-regex=".build|Tests"
