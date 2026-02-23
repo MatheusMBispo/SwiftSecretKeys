@@ -20,6 +20,23 @@ jobs:
           swift-version: "6.2"
       - name: Build
         run: swift build
+      - name: Compile generated output (template regression check)
+        run: |
+          mkdir -p /tmp/sskeys-ci-test
+
+          # XOR mode (works on both platforms)
+          printf 'keys:\n  CI_KEY: test-value\n  CI_SECRET: another\n' > /tmp/sskeys-ci-test/sskeys.yml
+          swift run sskeys generate --config /tmp/sskeys-ci-test/sskeys.yml --output-dir /tmp/sskeys-ci-test
+          swiftc -parse /tmp/sskeys-ci-test/SecretKeys.swift
+
+          # AES-GCM mode (macOS only — needs CryptoKit via SDK)
+          if [[ "$(uname)" == "Darwin" ]]; then
+            printf 'cipher: aes-gcm\nkeys:\n  CI_KEY: test-value\n  CI_SECRET: another\n' > /tmp/sskeys-ci-test/sskeys-aes.yml
+            swift run sskeys generate --config /tmp/sskeys-ci-test/sskeys-aes.yml --output-dir /tmp/sskeys-ci-test
+            swiftc -sdk "$(xcrun --show-sdk-path)" -typecheck /tmp/sskeys-ci-test/SecretKeys.swift
+          fi
+      - name: Integration test (SPM Build Tool Plugin)
+        run: swift build --package-path IntegrationFixture
       - name: Test with coverage
         run: swift test --enable-code-coverage
       - name: Report coverage
