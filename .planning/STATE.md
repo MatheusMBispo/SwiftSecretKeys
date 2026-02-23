@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** Secrets embedded in client apps are obfuscated at build time, making casual extraction impractical — while keeping the developer experience frictionless
-**Current focus:** Phase 13 — ChaCha20 Cipher
+**Current focus:** Phase 14 — Multi-Environment Config
 
 ## Current Position
 
-Phase: 13 of 14 (ChaCha20 Cipher)
+Phase: 14 of 14 (Multi-Environment Config)
 Plan: 1 of 1 in current phase
 Status: Phase complete
-Last activity: 2026-02-23 — Completed 13-01: ChaCha20-Poly1305 cipher mode
+Last activity: 2026-02-23 — Completed 14-01: Multi-environment config support
 
-Progress: [█████░░░░░] 40%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 3 min
-- Total execution time: 0.2 hours
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [█████░░░░░] 40%
 | 11-infrastructure-hardening | 3 | 10 min | 3 min |
 | 12-developer-experience | 2 | 4 min | 2 min |
 | 13-chacha20-cipher | 1 | 2 min | 2 min |
+| 14-multi-environment | 1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 11-03 (2 min), 12-01 (2 min), 12-02 (2 min), 13-01 (2 min)
+- Last 5 plans: 11-03 (2 min), 12-01 (2 min), 12-02 (2 min), 13-01 (2 min), 14-01 (4 min)
 - Trend: steady
 
 *Updated after each plan completion*
@@ -62,6 +63,10 @@ Recent decisions affecting current work:
 - [13-01]: ChaChaPoly.SealedBox.combined returns non-optional Data (unlike AES-GCM) — Array() directly, no guard-let required
 - [13-01]: No new SPM dependencies — ChaChaPoly already available via existing swift-crypto 4.2.0 dependency
 - [13-01]: ChaCha20 CI compile-check gated inside Darwin block alongside AES-GCM (both require CryptoKit SDK)
+- [14-01]: Config.environmentNames(from:) added as public helper to SwiftSecretKeysCore so ValidateCommand avoids direct Yams import (sskeys CLI target does not depend on Yams directly)
+- [14-01]: Cross-environment sanitization runs eagerly on ALL environments before environment selection — catches key name collisions in non-selected environments at load time
+- [14-01]: Flat keys: silently ignores --environment param to prevent CI breakage when non-migrated projects pass the flag via SSKEYS_ENVIRONMENT
+- [14-01]: ValidateCommand all-environments fallback uses catch SSKeysError.environmentRequired pattern — clean separation without special-casing inside Config.load
 
 ### Pending Todos
 
@@ -69,10 +74,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 14]: Config schema design for `environments:` block needs research before planning — specifically how namespace collisions are handled when the same key name exists across environments, and how the generated enum structure accommodates environment-scoped access
+None.
 
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 13-01-PLAN.md — ChaCha20-Poly1305 cipher mode
+Stopped at: Completed 14-01-PLAN.md — Multi-environment config support
 Resume file: None
