@@ -21,7 +21,7 @@ struct SwiftSecretKeysPlugin: BuildToolPlugin {
         } else if FileManager.default.fileExists(atPath: packageConfig.path) {
             configFile = packageConfig
         } else {
-            Diagnostics.warning(
+            Diagnostics.error(
                 "sskeys.yml not found for target '\(target.name)'. " +
                 "Place sskeys.yml in the target's source directory or package root. " +
                 "Skipping SwiftSecretKeys code generation."
@@ -62,7 +62,7 @@ extension SwiftSecretKeysPlugin: XcodeBuildToolPlugin {
             .appendingPathComponent("sskeys.yml")
 
         guard FileManager.default.fileExists(atPath: projectConfig.path) else {
-            Diagnostics.warning(
+            Diagnostics.error(
                 "sskeys.yml not found for Xcode target '\(target.displayName)'. " +
                 "Place sskeys.yml at the project root. " +
                 "Skipping SwiftSecretKeys code generation."
