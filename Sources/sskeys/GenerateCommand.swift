@@ -26,6 +26,9 @@ struct GenerateCommand: ParsableCommand {
     @Flag(name: .long, help: "Print generated output to stdout without writing files.")
     var dryRun: Bool = false
 
+    @Option(name: .shortAndLong, help: "Target environment (dev/staging/prod) when using environments: block.")
+    var environment: String? = nil
+
     mutating func run() throws {
         if let envFilePath = envFile {
             try DotEnvLoader.load(from: envFilePath)
@@ -48,7 +51,7 @@ struct GenerateCommand: ParsableCommand {
             throw SSKeysError.configFileNotFound(path: configPath)
         }
 
-        let loadedConfig = try Config.load(from: contents)
+        let loadedConfig = try Config.load(from: contents, environment: environment)
         log("Config loaded: \(configPath) (\(loadedConfig.keys.count) keys)")
         let cipherLabel: String
         switch loadedConfig.cipher {

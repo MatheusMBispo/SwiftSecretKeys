@@ -11,6 +11,8 @@ public enum SSKeysError: LocalizedError, Equatable {
     case invalidCipher(value: String)
     case encryptionFailed(reason: String)
     case dotEnvFileNotFound(path: String)
+    case environmentNotFound(name: String, available: [String])
+    case environmentRequired
 
     public var errorDescription: String? {
         switch self {
@@ -19,7 +21,7 @@ public enum SSKeysError: LocalizedError, Equatable {
         case let .invalidConfig(reason):
             return "Invalid configuration: \(reason)"
         case .missingKeys:
-            return "Configuration must contain a 'keys' dictionary with at least one entry."
+            return "Configuration must contain a 'keys' or 'environments' dictionary with at least one entry."
         case let .environmentVariableNotFound(name):
             return "Environment variable '\(name)' is not set."
         case let .outputDirectoryNotFound(path):
@@ -34,6 +36,10 @@ public enum SSKeysError: LocalizedError, Equatable {
             return "Encryption failed: \(reason)"
         case let .dotEnvFileNotFound(path):
             return "Environment file not found at '\(path)'."
+        case let .environmentNotFound(name, available):
+            return "Environment '\(name)' not found. Available environments: \(available.joined(separator: ", "))."
+        case .environmentRequired:
+            return "This config uses 'environments:' block. Specify an environment with --environment <name>."
         }
     }
 }
