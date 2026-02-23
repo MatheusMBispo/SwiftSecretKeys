@@ -29,7 +29,7 @@ public enum SSKeysError: LocalizedError, Equatable {
         case let .keyNameCollision(names, sanitized):
             return "Key names \(names) all sanitize to '\(sanitized)'. Rename one to avoid collision."
         case let .invalidCipher(value):
-            return "Unknown cipher '\(value)'. Supported values: 'xor', 'aes-gcm'."
+            return "Unknown cipher '\(value)'. Supported values: 'xor', 'aes-gcm', 'chacha20'."
         case let .encryptionFailed(reason):
             return "Encryption failed: \(reason)"
         case let .dotEnvFileNotFound(path):

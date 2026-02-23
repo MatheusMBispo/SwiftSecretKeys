@@ -50,12 +50,21 @@ struct GenerateCommand: ParsableCommand {
 
         let loadedConfig = try Config.load(from: contents)
         log("Config loaded: \(configPath) (\(loadedConfig.keys.count) keys)")
-        log("Cipher mode: \(loadedConfig.cipher == .aesgcm ? "AES-256-GCM" : "XOR")")
+        let cipherLabel: String
+        switch loadedConfig.cipher {
+        case .xor: cipherLabel = "XOR"
+        case .aesgcm: cipherLabel = "AES-256-GCM"
+        case .chacha20: cipherLabel = "ChaCha20-Poly1305"
+        }
+        log("Cipher mode: \(cipherLabel)")
 
         let generator = Generator(config: loadedConfig, saltLength: factor)
-        if loadedConfig.cipher == .aesgcm {
+        switch loadedConfig.cipher {
+        case .aesgcm:
             log("Generating AES-256-GCM cipher (32-byte key, fresh nonce per key)...")
-        } else {
+        case .chacha20:
+            log("Generating ChaCha20-Poly1305 cipher (32-byte key, fresh nonce per key)...")
+        case .xor:
             log("Generating cipher (salt length: \(factor) bytes)...")
         }
         try generator.generate(outputDirectory: outputDir, dryRun: dryRun)

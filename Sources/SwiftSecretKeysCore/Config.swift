@@ -4,6 +4,7 @@ import Yams
 public enum CipherMode: String, Sendable {
     case xor = "xor"
     case aesgcm = "aes-gcm"
+    case chacha20 = "chacha20"
 }
 
 public struct Config: Sendable {
