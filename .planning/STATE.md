@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 11 of 14 (Infrastructure Hardening)
-Plan: 2 of 2 in current phase
+Plan: 3 of 3 in current phase
 Status: Phase complete
-Last activity: 2026-02-23 — Completed 11-02: IntegrationFixture package and CI compile checks
+Last activity: 2026-02-23 — Completed 11-03: Missing sskeys.yml now produces Diagnostics.error build failure
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██░░░░░░░░] 21%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 4 min
-- Total execution time: 0.1 hours
+- Total plans completed: 3
+- Average duration: 3 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 11-infrastructure-hardening | 2 | 8 min | 4 min |
+| 11-infrastructure-hardening | 3 | 10 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 11-01 (5 min), 11-02 (3 min)
+- Last 5 plans: 11-01 (5 min), 11-02 (3 min), 11-03 (2 min)
 - Trend: steady
 
 *Updated after each plan completion*
@@ -50,6 +50,7 @@ Recent decisions affecting current work:
 - [11-01]: Added SSKeysError.encryptionFailed(reason:) to give the AES-GCM path a typed, testable error instead of a force-unwrap crash
 - [Phase 11]: SPM local path dependency plugin identity uses directory name not package name field — package: 'SwiftSecretKeys' not 'sskeys'
 - [Phase 11]: CI compile check uses swiftc -parse for XOR (cross-platform, no SDK) and swiftc -typecheck with SDK for AES-GCM (macOS-only, CryptoKit requires SDK)
+- [11-03]: Diagnostics.error + return [] is the idiomatic PackagePlugin pattern for hard build failures — SPM treats any Diagnostics.error emission as a build failure regardless of return value
 
 ### Pending Todos
 
@@ -62,5 +63,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 11-02-PLAN.md — Phase 11 complete, all infrastructure hardening plans done
+Stopped at: Completed 11-03-PLAN.md — Phase 11 fully complete (all 3 plans done, all success criteria met)
 Resume file: None
