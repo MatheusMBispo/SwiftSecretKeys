@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 ## Current Position
 
 Phase: 12 of 14 (Developer Experience)
-Plan: 1 of ? in current phase
-Status: In progress
-Last activity: 2026-02-23 — Completed 12-01: sskeys validate subcommand and --env-file flag added
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-23 — Completed 12-02: --dry-run flag and version+timestamp header in generated output
 
-Progress: [███░░░░░░░] 29%
+Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -28,10 +28,10 @@ Progress: [███░░░░░░░] 29%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 11-infrastructure-hardening | 3 | 10 min | 3 min |
-| 12-developer-experience | 1 | 2 min | 2 min |
+| 12-developer-experience | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 11-01 (5 min), 11-02 (3 min), 11-03 (2 min), 12-01 (2 min)
+- Last 5 plans: 11-01 (5 min), 11-02 (3 min), 11-03 (2 min), 12-01 (2 min), 12-02 (2 min)
 - Trend: steady
 
 *Updated after each plan completion*
@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - [12-01]: DotEnvLoader placed in sskeys CLI target (not SwiftSecretKeysCore) because setenv() mutates global C environ — library code should not have global state side effects
 - [12-01]: DotEnvLoader.load() called before Config.load() in both commands to guarantee setenv changes visible on all platforms before ProcessInfo.processInfo.environment is read
 - [12-01]: ValidateCommand uses ArgumentParser's built-in error propagation — throwing a LocalizedError in run() prints errorDescription to stderr and exits non-zero automatically
+- [12-02]: Version constant isolated in Version.swift enum for single authoritative source — bumped manually on each release, never derived at runtime
+- [12-02]: dryRun early-return placed after rendered string is produced but before outputURL resolution — file I/O completely skipped, not just the write call
+- [12-02]: stdout carries only generated Swift code in dry-run mode — meta-messages suppressed at GenerateCommand level so piping works cleanly
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 12-01-PLAN.md — sskeys validate subcommand and --env-file support implemented
+Stopped at: Completed 12-02-PLAN.md — --dry-run flag and version+timestamp header in generated output
 Resume file: None
