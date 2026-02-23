@@ -20,7 +20,14 @@ struct GenerateCommand: ParsableCommand {
     @Option(name: .long, help: "Override output directory (used by SPM plugin).")
     var outputDir: String? = nil
 
+    @Option(name: .long, help: "Path to a .env file to load before generation.")
+    var envFile: String? = nil
+
     mutating func run() throws {
+        if let envFilePath = envFile {
+            try DotEnvLoader.load(from: envFilePath)
+        }
+
         let cwd = FileManager.default.currentDirectoryPath
         let configPath: String
         if config.hasPrefix("/") {
