@@ -23,6 +23,9 @@ struct GenerateCommand: ParsableCommand {
     @Option(name: .long, help: "Path to a .env file to load before generation.")
     var envFile: String? = nil
 
+    @Flag(name: .long, help: "Print generated output to stdout without writing files.")
+    var dryRun: Bool = false
+
     mutating func run() throws {
         if let envFilePath = envFile {
             try DotEnvLoader.load(from: envFilePath)
@@ -55,16 +58,18 @@ struct GenerateCommand: ParsableCommand {
         } else {
             log("Generating cipher (salt length: \(factor) bytes)...")
         }
-        try generator.generate(outputDirectory: outputDir)
+        try generator.generate(outputDirectory: outputDir, dryRun: dryRun)
 
-        let effectiveOutput: String
-        if let dir = outputDir {
-            effectiveOutput = dir
-        } else {
-            effectiveOutput = loadedConfig.output.isEmpty ? "./" : loadedConfig.output
+        if !dryRun {
+            let effectiveOutput: String
+            if let dir = outputDir {
+                effectiveOutput = dir
+            } else {
+                effectiveOutput = loadedConfig.output.isEmpty ? "./" : loadedConfig.output
+            }
+            log("Writing SecretKeys.swift to \(effectiveOutput)")
+            print("Generated SecretKeys.swift at \(effectiveOutput)")
         }
-        log("Writing SecretKeys.swift to \(effectiveOutput)")
-        print("Generated SecretKeys.swift at \(effectiveOutput)")
     }
 
     private func log(_ message: String) {

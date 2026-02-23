@@ -20,7 +20,7 @@ public struct Generator {
         self.saltLength = saltLength
     }
 
-    public func generate(outputDirectory: String? = nil) throws {
+    public func generate(outputDirectory: String? = nil, dryRun: Bool = false) throws {
         let nameMap = try Sanitizer.sanitize(keyNames: Array(config.keys.keys))
 
         let rendered: String
@@ -54,6 +54,11 @@ public struct Generator {
             aesKeyConfigs.sort { $0.name < $1.name }
 
             rendered = renderAESGCMOutput(keyBytes: keyBytes, keyConfigs: aesKeyConfigs)
+        }
+
+        if dryRun {
+            print(rendered)
+            return
         }
 
         let outputURL: URL
