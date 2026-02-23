@@ -32,15 +32,21 @@ struct SwiftSecretKeysPlugin: BuildToolPlugin {
         let outputFile = context.pluginWorkDirectoryURL
             .appendingPathComponent("SecretKeys.swift")
 
+        var arguments: [String] = [
+            "generate",
+            "--config", configFile.path,
+            "--output-dir", context.pluginWorkDirectoryURL.path,
+        ]
+
+        if let envName = ProcessInfo.processInfo.environment["SSKEYS_ENVIRONMENT"] {
+            arguments += ["--environment", envName]
+        }
+
         return [
             .buildCommand(
                 displayName: "SwiftSecretKeys: Generate SecretKeys.swift",
                 executable: sskeys.url,
-                arguments: [
-                    "generate",
-                    "--config", configFile.path,
-                    "--output-dir", context.pluginWorkDirectoryURL.path,
-                ],
+                arguments: arguments,
                 inputFiles: [configFile],
                 outputFiles: [outputFile]
             )
@@ -73,15 +79,21 @@ extension SwiftSecretKeysPlugin: XcodeBuildToolPlugin {
         let outputFile = context.pluginWorkDirectoryURL
             .appendingPathComponent("SecretKeys.swift")
 
+        var arguments: [String] = [
+            "generate",
+            "--config", projectConfig.path,
+            "--output-dir", context.pluginWorkDirectoryURL.path,
+        ]
+
+        if let envName = ProcessInfo.processInfo.environment["SSKEYS_ENVIRONMENT"] {
+            arguments += ["--environment", envName]
+        }
+
         return [
             .buildCommand(
                 displayName: "SwiftSecretKeys: Generate SecretKeys.swift",
                 executable: sskeys.url,
-                arguments: [
-                    "generate",
-                    "--config", projectConfig.path,
-                    "--output-dir", context.pluginWorkDirectoryURL.path,
-                ],
+                arguments: arguments,
                 inputFiles: [projectConfig],
                 outputFiles: [outputFile]
             )
