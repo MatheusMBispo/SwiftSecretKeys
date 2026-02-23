@@ -384,12 +384,35 @@ struct GeneratorTests {
             (.invalidKeyName(original: "123bad"), "123bad"),
             (.keyNameCollision(names: ["a", "b"], sanitized: "c"), "collision"),
             (.invalidCipher(value: "rot13"), "rot13"),
+            (.encryptionFailed(reason: "bad data"), "bad data"),
         ]
         for (error, expectedSubstring) in errors {
             let description = error.errorDescription
             #expect(description != nil, "errorDescription should not be nil for \(error)")
             #expect(description?.contains(expectedSubstring) == true,
                     "errorDescription for \(error) should contain '\(expectedSubstring)'")
+        }
+    }
+
+    @Test("aesGCMTemplateUsesPreconditionFailure: generated _decryptAESGCM uses preconditionFailure not silent return")
+    func aesGCMTemplateUsesPreconditionFailure() throws {
+        try withTempCWD { tempDir in
+            let yaml = """
+            cipher: aes-gcm
+            keys:
+              testKey: some-value
+            """
+            let config = try makeConfig(yaml: yaml)
+            let generator = Generator(config: config)
+            try generator.generate()
+
+            let fileURL = tempDir.appendingPathComponent("SecretKeys.swift")
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+
+            // Must contain preconditionFailure for descriptive crash
+            #expect(content.contains("preconditionFailure"))
+            // Must NOT contain silent return ""
+            #expect(!content.contains("return \"\""))
         }
     }
 

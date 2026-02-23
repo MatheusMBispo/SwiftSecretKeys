@@ -137,4 +137,40 @@ struct ConfigTests {
             try Config.load(from: yaml)
         }
     }
+
+    @Test("multipleEnvVarsInSingleValue: multiple ${VAR} refs in one value all resolve")
+    func multipleEnvVarsInSingleValue() throws {
+        let varA = "SSKEYS_MULTI_A_12345"
+        let varB = "SSKEYS_MULTI_B_12345"
+        setenv(varA, "alpha", 1)
+        setenv(varB, "beta", 1)
+        defer {
+            unsetenv(varA)
+            unsetenv(varB)
+        }
+
+        let yaml = """
+        keys:
+          CONNECTION: "host=${\(varA)};db=${\(varB)}"
+        """
+        let config = try Config.load(from: yaml)
+        #expect(config.keys["CONNECTION"] == "host=alpha;db=beta")
+    }
+
+    @Test("multipleEnvVarsPartialMissing: throws on first missing var even when others are set")
+    func multipleEnvVarsPartialMissing() throws {
+        let varA = "SSKEYS_PARTIAL_A_12345"
+        let varB = "SSKEYS_PARTIAL_B_MISSING_12345"
+        setenv(varA, "present", 1)
+        unsetenv(varB)
+        defer { unsetenv(varA) }
+
+        let yaml = """
+        keys:
+          CONNECTION: "${\(varA)}:${\(varB)}"
+        """
+        #expect(throws: SSKeysError.environmentVariableNotFound(name: varB)) {
+            try Config.load(from: yaml)
+        }
+    }
 }
