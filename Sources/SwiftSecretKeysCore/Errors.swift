@@ -9,6 +9,7 @@ public enum SSKeysError: LocalizedError, Equatable {
     case invalidKeyName(original: String)
     case keyNameCollision(names: [String], sanitized: String)
     case invalidCipher(value: String)
+    case encryptionFailed(reason: String)
 
     public var errorDescription: String? {
         switch self {
@@ -28,6 +29,8 @@ public enum SSKeysError: LocalizedError, Equatable {
             return "Key names \(names) all sanitize to '\(sanitized)'. Rename one to avoid collision."
         case let .invalidCipher(value):
             return "Unknown cipher '\(value)'. Supported values: 'xor', 'aes-gcm'."
+        case let .encryptionFailed(reason):
+            return "Encryption failed: \(reason)"
         }
     }
 }

@@ -105,8 +105,10 @@ public struct Generator {
     private func encryptAESGCM(_ value: String, using key: SymmetricKey) throws -> [UInt8] {
         let nonce = AES.GCM.Nonce()  // Fresh 12-byte random nonce per value
         let sealedBox = try AES.GCM.seal(Data(value.utf8), using: key, nonce: nonce)
-        // combined is non-nil because default nonce is always 12 bytes
-        return Array(sealedBox.combined!)
+        guard let combined = sealedBox.combined else {
+            throw SSKeysError.encryptionFailed(reason: "AES-GCM SealedBox has no combined representation")
+        }
+        return Array(combined)
     }
 
     private func renderOutput(saltChunks: [[UInt8]], keyConfigs: [KeyConfig]) -> String {
@@ -238,9 +240,11 @@ public struct Generator {
 
             private static func _decryptAESGCM(_ combined: [UInt8]) -> String {
                 let key = SymmetricKey(data: Data(aesKey))
-                guard let sealedBox = try? AES.GCM.SealedBox(combined: Data(combined)),
-                      let plaintext = try? AES.GCM.open(sealedBox, using: key) else {
-                    return ""
+                guard let sealedBox = try? AES.GCM.SealedBox(combined: Data(combined)) else {
+                    preconditionFailure("SwiftSecretKeys: AES-GCM SealedBox initialization failed — corrupted generated data")
+                }
+                guard let plaintext = try? AES.GCM.open(sealedBox, using: key) else {
+                    preconditionFailure("SwiftSecretKeys: AES-GCM decryption failed — key or data corrupted")
                 }
                 return String(decoding: plaintext, as: UTF8.self)
             }

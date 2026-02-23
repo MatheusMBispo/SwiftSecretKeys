@@ -43,14 +43,15 @@ public struct Config: Sendable {
         var resolvedKeys = [String: String]()
         for (key, value) in raw.keys {
             if value.contains(envVarPattern) {
-                guard let match = value.firstMatch(of: envVarPattern) else {
-                    throw SSKeysError.invalidConfig(reason: "Malformed environment variable reference in value for key '\(key)'.")
+                var resolved = value
+                for match in value.matches(of: envVarPattern) {
+                    let varName = String(match.output.1)
+                    guard let envValue = ProcessInfo.processInfo.environment[varName] else {
+                        throw SSKeysError.environmentVariableNotFound(name: varName)
+                    }
+                    resolved = resolved.replacingOccurrences(of: String(match.output.0), with: envValue)
                 }
-                let varName = String(match.output.1)
-                guard let envValue = ProcessInfo.processInfo.environment[varName] else {
-                    throw SSKeysError.environmentVariableNotFound(name: varName)
-                }
-                resolvedKeys[key] = envValue
+                resolvedKeys[key] = resolved
             } else {
                 resolvedKeys[key] = value
             }
