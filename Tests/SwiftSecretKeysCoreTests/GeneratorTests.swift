@@ -327,6 +327,111 @@ struct GeneratorTests {
             #expect(!content.contains("_decryptAESGCM"))
             #expect(!content.contains("CryptoKit"))
             #expect(!content.contains("AES.GCM"))
+            // Must NOT contain ChaCha20 artifacts
+            #expect(!content.contains("chachaKey"))
+            #expect(!content.contains("_decryptChaCha20"))
+            #expect(!content.contains("ChaChaPoly"))
+        }
+    }
+
+    // MARK: - ChaCha20 tests
+
+    @Test("chacha20GeneratesValidStructure: generated file has ChaCha20 structure and not XOR/AES-GCM artifacts")
+    func chacha20GeneratesValidStructure() throws {
+        try withTempCWD { tempDir in
+            let yaml = """
+            cipher: chacha20
+            keys:
+              apiKey: test-value
+              dbPass: secret
+            """
+            let config = try makeConfig(yaml: yaml)
+            let generator = Generator(config: config)
+            try generator.generate()
+
+            let fileURL = tempDir.appendingPathComponent("SecretKeys.swift")
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+
+            #expect(content.contains("import Foundation"))
+            #expect(content.contains("#if canImport(CryptoKit)"))
+            #expect(content.contains("import CryptoKit"))
+            #expect(content.contains("import Crypto"))
+            #expect(content.contains("enum SecretKeys"))
+            #expect(content.contains("private static let chachaKey: [UInt8]"))
+            #expect(content.contains("static var apiKey"))
+            #expect(content.contains("static var dbPass"))
+            #expect(content.contains("_decryptChaCha20"))
+            #expect(content.contains("ChaChaPoly.SealedBox"))
+            #expect(content.contains("ChaChaPoly.open"))
+            #expect(content.contains("SECURITY NOTICE"))
+            #expect(content.contains("OWASP"))
+            // Must NOT contain XOR-only artifacts
+            #expect(!content.contains("let salt:"))
+            #expect(!content.contains("func decode"))
+            // Must NOT contain AES-GCM artifacts
+            #expect(!content.contains("aesKey"))
+            #expect(!content.contains("_decryptAESGCM"))
+            #expect(!content.contains("AES.GCM"))
+        }
+    }
+
+    @Test("chacha20RoundTripDecryption: extracted key and combined bytes decrypt to original plaintext")
+    func chacha20RoundTripDecryption() throws {
+        try withTempCWD { tempDir in
+            let originalValue = "hello-world-secret"
+            let yaml = """
+            cipher: chacha20
+            keys:
+              testKey: \(originalValue)
+            """
+            let config = try makeConfig(yaml: yaml)
+            let generator = Generator(config: config)
+            try generator.generate()
+
+            let fileURL = tempDir.appendingPathComponent("SecretKeys.swift")
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+
+            // Extract chachaKey bytes
+            let keyBytes = extractFirstByteArray(from: content, between: "let chachaKey: [UInt8] = [", and: "    ]")
+            #expect(keyBytes.count == 32, "ChaCha20 key must be 32 bytes")
+
+            // Extract combined bytes for testKey
+            guard let keyVarRange = content.range(of: "static var testKey: String {") else {
+                Issue.record("testKey not found in generated output")
+                return
+            }
+            let afterKeyVar = String(content[keyVarRange.upperBound...])
+            let combinedBytes = extractFirstByteArray(from: afterKeyVar, between: "let combined: [UInt8] = [", and: "        ]")
+            // combined = nonce(12) + ciphertext + tag(16), so minimum is 12 + 0 + 16 = 28
+            #expect(combinedBytes.count >= 28, "Combined must have at least nonce + tag bytes")
+
+            // Perform the same decryption the generated code would do
+            let key = SymmetricKey(data: Data(keyBytes))
+            let sealedBox = try ChaChaPoly.SealedBox(combined: Data(combinedBytes))
+            let plaintext = try ChaChaPoly.open(sealedBox, using: key)
+            let decoded = String(decoding: plaintext, as: UTF8.self)
+            #expect(decoded == originalValue)
+        }
+    }
+
+    @Test("xorModeNoChaCha20Artifacts: cipher: xor output has no ChaCha20 artifacts (regression guard)")
+    func xorModeNoChaCha20Artifacts() throws {
+        try withTempCWD { tempDir in
+            let yaml = """
+            cipher: xor
+            keys:
+              myKey: some-value
+            """
+            let config = try makeConfig(yaml: yaml)
+            let generator = Generator(config: config)
+            try generator.generate()
+
+            let fileURL = tempDir.appendingPathComponent("SecretKeys.swift")
+            let content = try String(contentsOf: fileURL, encoding: .utf8)
+
+            #expect(!content.contains("chachaKey"))
+            #expect(!content.contains("_decryptChaCha20"))
+            #expect(!content.contains("ChaChaPoly"))
         }
     }
 

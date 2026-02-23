@@ -34,6 +34,11 @@ jobs:
             printf 'cipher: aes-gcm\nkeys:\n  CI_KEY: test-value\n  CI_SECRET: another\n' > /tmp/sskeys-ci-test/sskeys-aes.yml
             swift run sskeys generate --config /tmp/sskeys-ci-test/sskeys-aes.yml --output-dir /tmp/sskeys-ci-test
             swiftc -sdk "$(xcrun --show-sdk-path)" -typecheck /tmp/sskeys-ci-test/SecretKeys.swift
+
+            # ChaCha20-Poly1305 mode (macOS only — needs CryptoKit via SDK)
+            printf 'cipher: chacha20\nkeys:\n  CI_KEY: test-value\n  CI_SECRET: another\n' > /tmp/sskeys-ci-test/sskeys-chacha20.yml
+            swift run sskeys generate --config /tmp/sskeys-ci-test/sskeys-chacha20.yml --output-dir /tmp/sskeys-ci-test
+            swiftc -sdk "$(xcrun --show-sdk-path)" -typecheck /tmp/sskeys-ci-test/SecretKeys.swift
           fi
       - name: Integration test (SPM Build Tool Plugin)
         run: swift build --package-path IntegrationFixture
