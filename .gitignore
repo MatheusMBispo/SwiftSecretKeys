@@ -4,3 +4,5 @@
 /*.xcodeproj
 xcuserdata/
 .planning/
+IntegrationFixture/.build/
+IntegrationFixture/Package.resolved
