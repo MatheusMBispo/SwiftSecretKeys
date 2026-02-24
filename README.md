@@ -1,10 +1,17 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
-    <img alt="SwiftSecretKeys" src="assets/logo-dark.svg" width="600">
-  </picture>
-</p>
+```
+  ____          _  __ _
+ / ___|_      _(_)/ _| |_
+ \___ \ \ /\ / / | |_| __|
+  ___) \ V  V /| |  _| |_
+ |____/ \_/\_/ |_|_|  \__|
+
+  ____                     _   _  __
+ / ___|  ___  ___ _ __ ___| |_| |/ /___ _   _ ___
+ \___ \ / _ \/ __| '__/ _ \ __| ' // _ \ | | / __|
+  ___) |  __/ (__| | |  __/ |_| . \  __/ |_| \__ \
+ |____/ \___|\___|_|  \___|\__|_|\_\___|\__, |___/
+                                        |___/
+```
 
 # SwiftSecretKeys
 
