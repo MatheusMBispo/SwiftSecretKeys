@@ -6,28 +6,30 @@
 ![SPM](https://img.shields.io/badge/SPM-compatible-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-**Build-time secret obfuscation for Swift projects.** CLI tool and SPM Build Tool Plugin that generates a `SecretKeys.swift` file with XOR, AES-GCM, or ChaCha20-Poly1305 encrypted values, decoded at runtime. Prevents secrets from being trivially extracted via `strings` or binary analysis.
+**Build-time secret obfuscation for Swift projects — keep your API keys out of `strings` dumps.** CLI tool and SPM Build Tool Plugin that generates a `SecretKeys.swift` file with XOR, AES-GCM, or ChaCha20-Poly1305 encrypted values, decoded at runtime. Prevents secrets from being trivially extracted via `strings` or binary analysis.
+
+Works as a **CLI tool** and as an **SPM Build Tool Plugin** — zero config for most projects.
 
 ---
 
 ## Table of Contents
 
 - [Why Use It](#why-use-it)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [CLI Reference](#cli-reference)
-- [Configuration](#configuration)
-- [SPM Build Tool Plugin](#spm-build-tool-plugin)
-- [Security](#security)
-- [Examples](#examples)
-- [Contributing](#contributing)
-- [License](#license)
+- [🚀 Quick Start](#quick-start)
+- [📦 Installation](#installation)
+- [🔧 CLI Reference](#cli-reference)
+- [⚙️ Configuration](#configuration)
+- [🛠️ SPM Build Tool Plugin](#spm-build-tool-plugin)
+- [🛡️ Security](#security)
+- [💡 Examples](#examples)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
 
 ---
 
 ## Why Use It
 
-API keys and tokens embedded in iOS/macOS binaries can be extracted with a simple `strings` command. SwiftSecretKeys makes that extraction return gibberish instead of plaintext.
+Shipping API keys in your iOS/macOS binary? Anyone with `strings` can read them in seconds. SwiftSecretKeys makes that return gibberish instead of your secrets.
 
 - **Zero runtime dependencies** — generated code uses only Foundation (XOR) or CryptoKit (AES-GCM, ChaCha20-Poly1305)
 - **Three cipher modes** — XOR (fast, lightweight), AES-GCM (stronger, per-value encryption), or ChaCha20-Poly1305 (modern AEAD alternative)
@@ -41,7 +43,7 @@ API keys and tokens embedded in iOS/macOS binaries can be extracted with a simpl
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 **1.** Create `sskeys.yml` at your project root:
 
@@ -65,11 +67,11 @@ let key = SecretKeys.apiKey
 let token = SecretKeys.analyticsToken
 ```
 
-That's it. The generated `SecretKeys.swift` handles encoding and decoding automatically.
+That's it — three steps and your secrets are obfuscated.
 
 ---
 
-## Installation
+## 📦 Installation
 
 ### Swift Package Manager (recommended)
 
@@ -112,7 +114,7 @@ cp .build/release/sskeys /usr/local/bin/sskeys
 
 ---
 
-## CLI Reference
+## 🔧 CLI Reference
 
 The `sskeys` tool has two subcommands: `generate` (default) and `validate`.
 
@@ -201,7 +203,7 @@ When no `--environment` is specified and the config uses an `environments:` bloc
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 The configuration file is written in YAML. By default, the CLI looks for `sskeys.yml` in the current directory.
 
@@ -344,7 +346,7 @@ If two keys sanitize to the same identifier, the tool exits with an error explai
 
 ---
 
-## SPM Build Tool Plugin
+## 🛠️ SPM Build Tool Plugin
 
 The plugin runs `sskeys generate` automatically on every build. No Run Script Phase needed.
 
@@ -396,7 +398,7 @@ The plugin also works with Xcode projects (non-SPM) via `XcodeBuildToolPlugin`:
 
 ---
 
-## Security
+## 🛡️ Security
 
 SwiftSecretKeys is a **build-time obfuscation tool**, not an encryption system. It makes secrets harder to extract from compiled binaries — it does not make extraction impossible.
 
@@ -416,14 +418,14 @@ SwiftSecretKeys is a **build-time obfuscation tool**, not an encryption system. 
 
 This tool maps to the obfuscation mitigation class ([MASWE-0089](https://mas.owasp.org/MASWE-0089)). MASVS-RESILIENCE-3 notes that obfuscation without additional runtime controls provides limited protection against a motivated attacker with binary access.
 
-### When to Use
+### ✅ When to Use
 
 - API keys for low-value or rate-limited services
 - Short-lived tokens that rotate frequently
 - Analytics or telemetry identifiers
 - Any secret where casual inspection is the primary threat model
 
-### When NOT to Use
+### ⚠️ When NOT to Use
 
 - Secrets that grant access to production databases or payment systems
 - Credentials whose compromise would trigger regulatory or legal consequences
@@ -432,7 +434,7 @@ This tool maps to the obfuscation mitigation class ([MASWE-0089](https://mas.owa
 
 ---
 
-## Examples
+## 💡 Examples
 
 ### Minimal XOR Setup
 
@@ -570,7 +572,7 @@ jobs:
 
 ---
 
-## Error Messages
+## 🚨 Error Messages
 
 SwiftSecretKeys provides actionable error messages for common issues:
 
@@ -589,7 +591,7 @@ SwiftSecretKeys provides actionable error messages for common issues:
 
 ---
 
-## Other Libraries
+## 📚 Other Libraries
 
 Other obfuscation and security tools in the Swift ecosystem:
 
@@ -599,9 +601,9 @@ Other obfuscation and security tools in the Swift ecosystem:
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome. Please open an issue first to discuss what you'd like to change.
+Contributions are welcome — whether it's a bug report, feature idea, or pull request. If you have something in mind, please open an issue first to discuss the approach. We'd love to hear from you!
 
 ```bash
 git clone https://github.com/MatheusMBispo/SwiftSecretKeys.git
@@ -614,6 +616,6 @@ The project uses swift-tools-version 6.2 with Swift 6 strict concurrency. All 48
 
 ---
 
-## License
+## 📄 License
 
 SwiftSecretKeys is available under the MIT License. See the [LICENSE](LICENSE) file for details.
