@@ -6,7 +6,7 @@
 ![SPM](https://img.shields.io/badge/SPM-compatible-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-**Build-time secret obfuscation for Swift projects.** CLI tool and SPM Build Tool Plugin that generates a `SecretKeys.swift` file with XOR or AES-GCM encrypted values, decoded at runtime. Prevents secrets from being trivially extracted via `strings` or binary analysis.
+**Build-time secret obfuscation for Swift projects.** CLI tool and SPM Build Tool Plugin that generates a `SecretKeys.swift` file with XOR, AES-GCM, or ChaCha20-Poly1305 encrypted values, decoded at runtime. Prevents secrets from being trivially extracted via `strings` or binary analysis.
 
 ---
 
@@ -29,10 +29,12 @@
 
 API keys and tokens embedded in iOS/macOS binaries can be extracted with a simple `strings` command. SwiftSecretKeys makes that extraction return gibberish instead of plaintext.
 
-- **Zero runtime dependencies** — generated code uses only Foundation (XOR) or CryptoKit (AES-GCM)
-- **Two cipher modes** — XOR (fast, lightweight) or AES-GCM (stronger, per-value encryption)
+- **Zero runtime dependencies** — generated code uses only Foundation (XOR) or CryptoKit (AES-GCM, ChaCha20-Poly1305)
+- **Three cipher modes** — XOR (fast, lightweight), AES-GCM (stronger, per-value encryption), or ChaCha20-Poly1305 (modern AEAD alternative)
 - **SPM Build Tool Plugin** — automatic generation on every build, no Run Script Phase needed
 - **CLI for CI/CD** — `sskeys generate` runs anywhere Swift runs
+- **Developer tools** — `sskeys validate` checks config without generating, `--dry-run` previews output, `.env` file loading
+- **Multi-environment support** — define per-environment secrets with `environments:` block
 - **Environment variable support** — reference `${ENV_VAR}` in your config for CI-injected secrets
 - **Swift 6 strict concurrency** — generated code compiles cleanly under strict concurrency checking
 - **Cross-platform** — macOS and Linux
@@ -75,7 +77,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/MatheusMBispo/SwiftSecretKeys.git", from: "1.0.0")
+    .package(url: "https://github.com/MatheusMBispo/SwiftSecretKeys.git", from: "1.1.0")
 ]
 ```
 
@@ -112,8 +114,14 @@ cp .build/release/sskeys /usr/local/bin/sskeys
 
 ## CLI Reference
 
+The `sskeys` tool has two subcommands: `generate` (default) and `validate`.
+
+### `sskeys generate`
+
+Generate a `.swift` file with obfuscated secrets.
+
 ```
-USAGE: sskeys generate [--config <path>] [--factor <n>] [--output-dir <path>] [--verbose]
+USAGE: sskeys generate [--config <path>] [--factor <n>] [--output-dir <path>] [--env-file <path>] [--dry-run] [--environment <name>] [--verbose]
 ```
 
 | Option | Short | Default | Description |
@@ -121,9 +129,12 @@ USAGE: sskeys generate [--config <path>] [--factor <n>] [--output-dir <path>] [-
 | `--config <path>` | `-c` | `sskeys.yml` | Path to the YAML configuration file |
 | `--factor <n>` | `-f` | `32` | Salt length in bytes (XOR mode) |
 | `--output-dir <path>` | | | Override output directory (ignores YAML `output` field) |
+| `--env-file <path>` | | | Path to a .env file to load before generation |
+| `--dry-run` | | | Print generated output to stdout without writing files |
+| `--environment <name>` | `-e` | | Target environment when using `environments:` block |
 | `--verbose` | `-v` | | Print processing steps to stderr |
 
-### Examples
+#### Examples
 
 ```bash
 # Basic generation
@@ -140,9 +151,53 @@ sskeys generate --factor 64
 
 # Override output directory
 sskeys generate --output-dir Sources/Generated/
+
+# Preview generated output without writing files
+sskeys generate --dry-run
+
+# Load secrets from a .env file
+sskeys generate --env-file .env.local
+
+# Generate for a specific environment
+sskeys generate --environment staging
+
+# Combine flags
+sskeys generate --env-file .env.local --environment prod --verbose
 ```
 
 When `--verbose` is enabled, processing steps are printed to **stderr** so they don't interfere with piped output or generated files.
+
+### `sskeys validate`
+
+Check config and resolve environment variables without generating files.
+
+```
+USAGE: sskeys validate [--config <path>] [--env-file <path>] [--environment <name>]
+```
+
+| Option | Short | Default | Description |
+|--------|-------|---------|-------------|
+| `--config <path>` | `-c` | `sskeys.yml` | Path to the YAML configuration file |
+| `--env-file <path>` | | | Path to a .env file to load before validation |
+| `--environment <name>` | `-e` | | Target environment to validate (omit to validate all) |
+
+#### Examples
+
+```bash
+# Validate default config
+sskeys validate
+
+# Validate a specific environment
+sskeys validate --environment prod
+
+# Validate with .env file loaded
+sskeys validate --env-file .env.local
+
+# Validate a specific config file
+sskeys validate --config secrets/production.yml
+```
+
+When no `--environment` is specified and the config uses an `environments:` block, `validate` checks all environments and reports each one individually.
 
 ---
 
@@ -153,7 +208,7 @@ The configuration file is written in YAML. By default, the CLI looks for `sskeys
 ### Full Reference
 
 ```yaml
-# Cipher mode: "xor" (default) or "aes-gcm"
+# Cipher mode: "xor" (default), "aes-gcm", or "chacha20"
 cipher: xor
 
 # Output directory for SecretKeys.swift (relative to cwd)
@@ -170,9 +225,12 @@ keys:
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `keys` | `{String: String}` | Yes | — | Key-value pairs. Keys become Swift property names, values are obfuscated. |
+| `keys` | `{String: String}` | Yes* | — | Key-value pairs. Keys become Swift property names, values are obfuscated. |
+| `environments` | `{String: {String: String}}` | Yes* | — | Per-environment key-value pairs. Mutually exclusive with `keys`. |
 | `output` | `String` | No | `""` (cwd) | Relative path for the generated `SecretKeys.swift` file. |
-| `cipher` | `String` | No | `"xor"` | Cipher mode: `"xor"` or `"aes-gcm"`. |
+| `cipher` | `String` | No | `"xor"` | Cipher mode: `"xor"`, `"aes-gcm"`, or `"chacha20"`. |
+
+*One of `keys` or `environments` is required.
 
 ### Environment Variables
 
@@ -200,6 +258,76 @@ AES-GCM mode generates a fresh 256-bit key and a unique 12-byte nonce per secret
 
 > [!NOTE]
 > AES-GCM produces different ciphertext on every build even with the same input. This is by design — nonce reuse prevention.
+
+### ChaCha20-Poly1305 Mode
+
+For a modern AEAD alternative to AES-GCM:
+
+```yaml
+cipher: chacha20
+keys:
+  apiKey: ${API_KEY}
+```
+
+ChaCha20-Poly1305 uses the same security model as AES-GCM: a fresh 256-bit key and 12-byte nonce per build, with authenticated encryption. The generated code uses CryptoKit on Apple platforms and swift-crypto on Linux.
+
+ChaCha20-Poly1305 is a modern alternative preferred in some contexts, particularly on platforms without AES hardware acceleration (AES-NI). Both ciphers provide equivalent security guarantees.
+
+> [!NOTE]
+> Like AES-GCM, ChaCha20-Poly1305 produces different ciphertext on every build. This is by design.
+
+### Multi-Environment Configuration
+
+For projects that need different secrets per environment (dev, staging, prod), use the `environments:` block instead of `keys:`:
+
+```yaml
+cipher: aes-gcm
+output: Sources/Generated/
+environments:
+  dev:
+    apiKey: dev-key-123
+    apiUrl: https://dev.api.example.com
+  staging:
+    apiKey: ${STAGING_API_KEY}
+    apiUrl: https://staging.api.example.com
+  prod:
+    apiKey: ${PROD_API_KEY}
+    apiUrl: https://api.example.com
+```
+
+Select an environment with `--environment <name>`:
+
+```bash
+sskeys generate --environment prod
+```
+
+> [!IMPORTANT]
+> - You cannot mix `keys:` and `environments:` in the same config file.
+> - All environments are validated for key name sanitization even when selecting a single one.
+> - When `environments:` is present, `--environment` is required for `generate`.
+
+### .env File Support
+
+Load environment variables from a `.env` file before resolving `${VAR}` references:
+
+```bash
+sskeys generate --env-file .env.local
+sskeys validate --env-file .env.local
+```
+
+The `.env` file supports standard formats:
+
+```env
+# Database credentials
+DB_PASSWORD=my-secret-password
+API_KEY="quoted-value"
+ANALYTICS_TOKEN='single-quoted'
+```
+
+- Lines starting with `#` are treated as comments
+- Blank lines are ignored
+- Values can be unquoted, double-quoted, or single-quoted
+- Variables are injected into the process environment before config resolution
 
 ### Key Name Sanitization
 
@@ -238,6 +366,15 @@ The plugin runs `sskeys generate` automatically on every build. No Run Script Ph
 
 The generated `SecretKeys.swift` is placed in the build directory and compiled automatically. It does not appear in your source tree.
 
+### Multi-Environment with the Plugin
+
+When using multi-environment configuration, set the `SSKEYS_ENVIRONMENT` environment variable. The plugin reads this variable and automatically passes `--environment <value>` to the CLI.
+
+```bash
+# In your CI/CD pipeline or Xcode scheme environment variables:
+SSKEYS_ENVIRONMENT=prod swift build
+```
+
 ### Xcode Project Support
 
 The plugin also works with Xcode projects (non-SPM) via `XcodeBuildToolPlugin`:
@@ -267,6 +404,7 @@ SwiftSecretKeys is a **build-time obfuscation tool**, not an encryption system. 
 
 - **XOR mode:** Encodes each byte with a random salt generated per build. Makes `strings` extraction return gibberish.
 - **AES-GCM mode:** Encrypts each value with AES-256-GCM using a fresh key and nonce per build. Significantly raises the effort required for extraction.
+- **ChaCha20-Poly1305 mode:** Encrypts each value with ChaCha20-Poly1305 AEAD using a fresh key and nonce per build. Equivalent security profile to AES-GCM, preferred on platforms without AES-NI.
 
 ### What It Does Not Do
 
@@ -330,6 +468,92 @@ export FIREBASE_TOKEN="AIza..."
 sskeys generate --verbose
 ```
 
+### ChaCha20-Poly1305 Setup
+
+```yaml
+# sskeys.yml
+cipher: chacha20
+output: Sources/Generated/
+keys:
+  apiKey: ${API_KEY}
+  webhookSecret: ${WEBHOOK_SECRET}
+```
+
+```bash
+export API_KEY="my-api-key"
+export WEBHOOK_SECRET="whsec_..."
+sskeys generate --verbose
+```
+
+### Multi-Environment Setup
+
+```yaml
+# sskeys.yml
+cipher: aes-gcm
+output: Sources/Generated/
+environments:
+  dev:
+    apiKey: dev-key-123
+    apiUrl: https://dev.api.example.com
+  staging:
+    apiKey: ${STAGING_API_KEY}
+    apiUrl: https://staging.api.example.com
+  prod:
+    apiKey: ${PROD_API_KEY}
+    apiUrl: https://api.example.com
+```
+
+```bash
+# Generate for a specific environment
+sskeys generate --environment dev
+
+# Validate all environments at once
+sskeys validate
+
+# Validate a single environment
+sskeys validate --environment prod
+
+# Use in CI/CD with the SPM plugin
+SSKEYS_ENVIRONMENT=prod swift build
+```
+
+### Dry Run Preview
+
+Preview the generated `SecretKeys.swift` without writing any files:
+
+```bash
+sskeys generate --dry-run
+sskeys generate --dry-run --environment staging
+```
+
+### Using a .env File
+
+Create a `.env.local` file with your secrets:
+
+```env
+# .env.local
+API_KEY=sk-1234567890abcdef
+STRIPE_SECRET_KEY=sk_live_...
+```
+
+Then reference them in your config:
+
+```yaml
+# sskeys.yml
+cipher: aes-gcm
+keys:
+  apiKey: ${API_KEY}
+  stripeKey: ${STRIPE_SECRET_KEY}
+```
+
+```bash
+# Load .env file and generate
+sskeys generate --env-file .env.local
+
+# Validate with .env file
+sskeys validate --env-file .env.local
+```
+
 ### CI/CD Integration (GitHub Actions)
 
 ```yaml
@@ -354,11 +578,14 @@ SwiftSecretKeys provides actionable error messages for common issues:
 |-----------|--------------|
 | Config file not found | `Configuration file not found at 'path'. Create sskeys.yml or use --config to specify a path.` |
 | Invalid YAML | `Invalid configuration: <reason>` |
-| No keys defined | `Configuration must contain a 'keys' dictionary with at least one entry.` |
+| No keys defined | `Configuration must contain a 'keys' or 'environments' dictionary with at least one entry.` |
 | Missing env var | `Environment variable 'NAME' is not set.` |
 | Bad output dir | `Output directory not found at 'path'.` |
-| Invalid cipher | `Unknown cipher 'value'. Supported values: 'xor', 'aes-gcm'.` |
+| Invalid cipher | `Unknown cipher 'value'. Supported values: 'xor', 'aes-gcm', 'chacha20'.` |
 | Key name collision | `Key names ['a', 'b'] all sanitize to 'x'. Rename one to avoid collision.` |
+| .env file not found | `Environment file not found at 'path'.` |
+| Environment not found | `Environment 'name' not found. Available environments: dev, staging, prod.` |
+| Environment required | `This config uses 'environments:' block. Specify an environment with --environment <name>.` |
 
 ---
 
@@ -383,7 +610,7 @@ swift build
 swift test
 ```
 
-The project uses Swift 6 with strict concurrency. All 33 tests must pass on both macOS and Linux.
+The project uses swift-tools-version 6.2 with Swift 6 strict concurrency. All 48 tests must pass on both macOS and Linux. Tests use the Swift Testing framework (`@Test`).
 
 ---
 
