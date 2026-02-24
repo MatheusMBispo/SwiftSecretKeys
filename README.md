@@ -1,11 +1,10 @@
-```
-   ____          _  ______  ____  __
-  / __/      __ (_)/ __/ /_/ __/ / /____ __  _____
- _\ \| | /| / // // _// __/\ \  //_/ -_) \ \/ (_-<
-/___/|_|/ \_//_//_/ \__/___/ /_/ \_\\__/_\_/\___/
-        |_|  [O]=========================o
-             |___________________________/
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
+    <img alt="SwiftSecretKeys" src="assets/logo-dark.svg" width="600">
+  </picture>
+</p>
 
 # SwiftSecretKeys
 
