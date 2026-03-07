@@ -38,8 +38,18 @@ struct SwiftSecretKeysPlugin: BuildToolPlugin {
             "--output-dir", context.pluginWorkDirectoryURL.path,
         ]
 
-        if let envName = ProcessInfo.processInfo.environment["SSKEYS_ENVIRONMENT"] {
+        let env = ProcessInfo.processInfo.environment
+        if let envName = env["SSKEYS_ENVIRONMENT"] {
             arguments += ["--environment", envName]
+        }
+        if let factor = env["SSKEYS_FACTOR"] {
+            arguments += ["--factor", factor]
+        }
+        if let envFile = env["SSKEYS_ENV_FILE"] {
+            arguments += ["--env-file", envFile]
+        }
+        if env["SSKEYS_VERBOSE"] != nil {
+            arguments += ["--verbose"]
         }
 
         return [
@@ -85,8 +95,18 @@ extension SwiftSecretKeysPlugin: XcodeBuildToolPlugin {
             "--output-dir", context.pluginWorkDirectoryURL.path,
         ]
 
-        if let envName = ProcessInfo.processInfo.environment["SSKEYS_ENVIRONMENT"] {
+        let env = ProcessInfo.processInfo.environment
+        if let envName = env["SSKEYS_ENVIRONMENT"] {
             arguments += ["--environment", envName]
+        }
+        if let factor = env["SSKEYS_FACTOR"] {
+            arguments += ["--factor", factor]
+        }
+        if let envFile = env["SSKEYS_ENV_FILE"] {
+            arguments += ["--env-file", envFile]
+        }
+        if env["SSKEYS_VERBOSE"] != nil {
+            arguments += ["--verbose"]
         }
 
         return [

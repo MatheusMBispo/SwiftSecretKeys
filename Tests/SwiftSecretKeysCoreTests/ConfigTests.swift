@@ -126,6 +126,17 @@ struct ConfigTests {
         #expect(config.cipher == .aesgcm)
     }
 
+    @Test("cipherParsesChaCha20: cipher: chacha20 parses as .chacha20")
+    func cipherParsesChaCha20() throws {
+        let yaml = """
+        cipher: chacha20
+        keys:
+          API_KEY: my-secret
+        """
+        let config = try Config.load(from: yaml)
+        #expect(config.cipher == .chacha20)
+    }
+
     @Test("invalidCipherThrows: unrecognized cipher value throws invalidCipher")
     func invalidCipherThrows() throws {
         let yaml = """
@@ -155,6 +166,25 @@ struct ConfigTests {
         """
         let config = try Config.load(from: yaml)
         #expect(config.keys["CONNECTION"] == "host=alpha;db=beta")
+    }
+
+    @Test("envVarValueContainingDollarBrace: env var value with ${...} pattern does not cascade")
+    func envVarValueContainingDollarBrace() throws {
+        let varA = "SSKEYS_CASCADE_A_12345"
+        let varB = "SSKEYS_CASCADE_B_12345"
+        setenv(varA, "${NOT_A_REAL_VAR}", 1)
+        setenv(varB, "plain", 1)
+        defer {
+            unsetenv(varA)
+            unsetenv(varB)
+        }
+
+        let yaml = """
+        keys:
+          COMBO: "${\(varA)}:${\(varB)}"
+        """
+        let config = try Config.load(from: yaml)
+        #expect(config.keys["COMBO"] == "${NOT_A_REAL_VAR}:plain")
     }
 
     @Test("multipleEnvVarsPartialMissing: throws on first missing var even when others are set")
@@ -312,6 +342,30 @@ struct ConfigTests {
         """
         let config = try Config.load(from: yaml, environment: "dev")
         #expect(config.cipher == .aesgcm)
+    }
+
+    @Test("sameEnvVarReferencedMultipleTimes: same ${VAR} used twice resolves both occurrences")
+    func sameEnvVarReferencedMultipleTimes() throws {
+        let varName = "SSKEYS_DUP_REF_12345"
+        setenv(varName, "tok", 1)
+        defer { unsetenv(varName) }
+
+        let yaml = """
+        keys:
+          PAIR: "${\(varName)}:${\(varName)}"
+        """
+        let config = try Config.load(from: yaml)
+        #expect(config.keys["PAIR"] == "tok:tok")
+    }
+
+    @Test("literalDollarSignPassesThrough: value with $ not followed by { is kept verbatim")
+    func literalDollarSignPassesThrough() throws {
+        let yaml = """
+        keys:
+          PASSWORD: "pa$$word"
+        """
+        let config = try Config.load(from: yaml)
+        #expect(config.keys["PASSWORD"] == "pa$$word")
     }
 
     @Test("emptyEnvironmentsDictThrowsMissingKeys: environments: {} throws missingKeys")

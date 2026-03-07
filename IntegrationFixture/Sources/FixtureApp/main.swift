@@ -1,3 +1,7 @@
 import Foundation
-// This target exists solely to exercise the SwiftSecretKeysPlugin.
-// The plugin generates SecretKeys.swift at build time.
+
+let value = SecretKeys.FIXTURE_KEY
+guard value == "integration-test-value" else {
+    fatalError("Runtime decryption failed: expected 'integration-test-value', got '\(value)'")
+}
+print("IntegrationFixture: runtime decryption OK — FIXTURE_KEY resolved correctly")

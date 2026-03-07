@@ -83,18 +83,19 @@ public struct Config: Sendable {
         let envVarPattern = /\$\{(\w+)\}/
         var resolvedKeys = [String: String]()
         for (key, value) in activeKeys {
-            if value.contains(envVarPattern) {
+            let matches = value.matches(of: envVarPattern)
+            if matches.isEmpty {
+                resolvedKeys[key] = value
+            } else {
                 var resolved = value
-                for match in value.matches(of: envVarPattern) {
+                for match in matches.reversed() {
                     let varName = String(match.output.1)
                     guard let envValue = ProcessInfo.processInfo.environment[varName] else {
                         throw SSKeysError.environmentVariableNotFound(name: varName)
                     }
-                    resolved = resolved.replacingOccurrences(of: String(match.output.0), with: envValue)
+                    resolved.replaceSubrange(match.range, with: envValue)
                 }
                 resolvedKeys[key] = resolved
-            } else {
-                resolvedKeys[key] = value
             }
         }
 

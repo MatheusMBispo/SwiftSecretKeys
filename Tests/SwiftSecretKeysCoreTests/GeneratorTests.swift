@@ -304,6 +304,45 @@ struct GeneratorTests {
         }
     }
 
+    @Test("chacha20NonceFreshness: two generates produce different combined bytes")
+    func chacha20NonceFreshness() throws {
+        try withTempCWD { tempDir in
+            let yaml = """
+            cipher: chacha20
+            keys:
+              mySecret: same-value-every-time
+            """
+            let config = try makeConfig(yaml: yaml)
+            let generator = Generator(config: config)
+
+            try generator.generate()
+            let fileURL = tempDir.appendingPathComponent("SecretKeys.swift")
+            let firstContent = try String(contentsOf: fileURL, encoding: .utf8)
+
+            try generator.generate()
+            let secondContent = try String(contentsOf: fileURL, encoding: .utf8)
+
+            guard let firstVarRange = firstContent.range(of: "static var mySecret: String {") else {
+                Issue.record("mySecret not found in first generated output")
+                return
+            }
+            let afterFirst = String(firstContent[firstVarRange.upperBound...])
+            let firstCombined = extractFirstByteArray(from: afterFirst, between: "let combined: [UInt8] = [", and: "        ]")
+
+            guard let secondVarRange = secondContent.range(of: "static var mySecret: String {") else {
+                Issue.record("mySecret not found in second generated output")
+                return
+            }
+            let afterSecond = String(secondContent[secondVarRange.upperBound...])
+            let secondCombined = extractFirstByteArray(from: afterSecond, between: "let combined: [UInt8] = [", and: "        ]")
+
+            #expect(firstCombined.count >= 28, "First combined must have at least nonce + tag bytes")
+            #expect(secondCombined.count >= 28, "Second combined must have at least nonce + tag bytes")
+
+            #expect(firstCombined != secondCombined, "Two generates must produce different combined bytes (fresh nonce per build)")
+        }
+    }
+
     @Test("xorModeUnchanged: cipher: xor output has no AES-GCM artifacts (regression guard)")
     func xorModeUnchanged() throws {
         try withTempCWD { tempDir in

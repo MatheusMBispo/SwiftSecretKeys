@@ -40,6 +40,20 @@ jobs:
             swift run sskeys generate --config /tmp/sskeys-ci-test/sskeys-chacha20.yml --output-dir /tmp/sskeys-ci-test
             swiftc -sdk "$(xcrun --show-sdk-path)" -typecheck /tmp/sskeys-ci-test/SecretKeys.swift
           fi
+      - name: Validate config (sskeys validate)
+        run: |
+          mkdir -p /tmp/sskeys-ci-validate
+
+          # Flat keys — validate
+          printf 'keys:\n  CI_KEY: test-value\n  CI_SECRET: another\n' > /tmp/sskeys-ci-validate/sskeys.yml
+          swift run sskeys validate --config /tmp/sskeys-ci-validate/sskeys.yml
+
+          # Environments — validate all
+          printf 'environments:\n  staging:\n    CI_KEY: staging-val\n  production:\n    CI_KEY: prod-val\n' > /tmp/sskeys-ci-validate/sskeys-envs.yml
+          swift run sskeys validate --config /tmp/sskeys-ci-validate/sskeys-envs.yml
+
+          # Environments — validate single
+          swift run sskeys validate --config /tmp/sskeys-ci-validate/sskeys-envs.yml --environment staging
       - name: Integration test (SPM Build Tool Plugin)
         run: swift build --package-path IntegrationFixture
       - name: Test with coverage
