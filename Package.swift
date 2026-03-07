@@ -1,11 +1,10 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.1
+
 import PackageDescription
 
 let package = Package(
-    name: "sskeys",
-    platforms: [
-        .macOS(.v13)
-    ],
+    name: "SwiftSecretKeys",
+    platforms: [.macOS(.v13)],
     products: [
         .executable(name: "sskeys", targets: ["sskeys"]),
         .library(name: "SwiftSecretKeysCore", targets: ["SwiftSecretKeysCore"]),
@@ -27,9 +26,14 @@ let package = Package(
         .executableTarget(
             name: "sskeys",
             dependencies: [
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 "SwiftSecretKeysCore",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
+        ),
+        .plugin(
+            name: "SwiftSecretKeysPlugin",
+            capability: .buildTool(),
+            dependencies: ["sskeys"]
         ),
         .testTarget(
             name: "SwiftSecretKeysCoreTests",
@@ -38,10 +42,6 @@ let package = Package(
                 .product(name: "Crypto", package: "swift-crypto"),
             ]
         ),
-        .plugin(
-            name: "SwiftSecretKeysPlugin",
-            capability: .buildTool(),
-            dependencies: ["sskeys"]
-        ),
-    ]
+    ],
+    swiftLanguageModes: [.v6]
 )

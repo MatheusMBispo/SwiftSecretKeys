@@ -1,5 +1,6 @@
 import ArgumentParser
 
+@main
 struct SSKeys: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "sskeys",
