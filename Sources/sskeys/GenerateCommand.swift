@@ -1,92 +1,68 @@
+import ArgumentParser
 import Foundation
-import Regex
-import SwiftCLI
-import SwiftShell
-import Yams
+import SwiftSecretKeysCore
 
-enum GenerateCommandError: ProcessError {
-    var exitStatus: Int32 {
-        -1
-    }
-    
-    case notFoundConfig
-    case invalidConfig
-    case invalidEnvironmentVariable(variableName: String)
-    
-    var message: String? {
-        switch self {
-        case .notFoundConfig:
-            return "Error! Create a configuration file (sskeys.yml) or set your custom path (--config)..."
-        case .invalidConfig:
-            return "Error! File cannot be generated (Verify the environments variables and the output path)..."
-        case let .invalidEnvironmentVariable(variableName):
-            return "Error! The environment variable '\(variableName)' was not found..."
-        }
-    }
-}
+struct GenerateCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "generate",
+        abstract: "Generate a .swift file with obfuscated secrets."
+    )
 
-class GenerateCommand: Command {
-    let name = "generate"
-    var shortDescription: String = "Generate a .swift file with secrets"
-    
-    @Key("-c", "--config", description: "Configuration file path")
-    var config: String?
-    
-    @Key("-f", "--factor", description: "Custom cipher factor")
-    var factor: Int?
-    
-    func execute() throws {
-        let config: String
-        
-        if let givenConfig = self.config {
-            config = givenConfig
+    @Option(name: .shortAndLong, help: "Configuration file path.")
+    var config: String = "sskeys.yml"
+
+    @Option(name: .shortAndLong, help: "Custom cipher factor (salt length in bytes).")
+    var factor: Int = 32
+
+    @Flag(name: .shortAndLong, help: "Print processing steps to stderr.")
+    var verbose: Bool = false
+
+    @Option(name: .long, help: "Override output directory (used by SPM plugin).")
+    var outputDir: String? = nil
+
+    mutating func run() throws {
+        let cwd = FileManager.default.currentDirectoryPath
+        let configPath: String
+        if config.hasPrefix("/") {
+            configPath = config
         } else {
-            config = "sskeys.yml"
+            configPath = URL(fileURLWithPath: cwd)
+                .appendingPathComponent(config)
+                .path
         }
-        let path = main.currentdirectory + "/" + config
+
         let contents: String
         do {
-            contents = try String(contentsOfFile: path)
+            contents = try String(contentsOfFile: configPath, encoding: .utf8)
         } catch {
-            throw GenerateCommandError.notFoundConfig
+            throw SSKeysError.configFileNotFound(path: configPath)
         }
-        
-        let secrets = try Yams.load(yaml: contents) as? [String: Any]
-        let keys = try readKeys(from: secrets)
-        let output = secrets?["output"] as? String
-        let generator = Generator(values: keys,
-                                  outputPath: output ?? "",
-                                  customFactor: factor ?? 32)
-        try generator.generate()
-    }
-    
-    func readKeys(from secrets: [String: Any]?) throws -> [String: String] {
-        guard let keys = secrets?["keys"] as? [String: String] else {
-            return [:]
-        }
-        
-        var auxKeys = [String: String]()
-        for (key, value) in keys {
-            auxKeys[key] = try convertToRealValue(value)
-        }
-        
-        return auxKeys
-    }
-    
-    func convertToRealValue(_ value: String) throws -> String {
-        if isEnvironment(value) {
-            let filteredValue = value.replacingFirst(matching: "(\\$\\{)(\\w{1,})(\\})", with: "$2")
-            guard let environmentValue = ProcessInfo.processInfo.environment[filteredValue] else {
-                throw GenerateCommandError
-                    .invalidEnvironmentVariable(variableName: filteredValue)
-            }
-            return environmentValue
+
+        let loadedConfig = try Config.load(from: contents)
+        log("Config loaded: \(configPath) (\(loadedConfig.keys.count) keys)")
+        log("Cipher mode: \(loadedConfig.cipher == .aesgcm ? "AES-256-GCM" : "XOR")")
+
+        let generator = Generator(config: loadedConfig, saltLength: factor)
+        if loadedConfig.cipher == .aesgcm {
+            log("Generating AES-256-GCM cipher (32-byte key, fresh nonce per key)...")
         } else {
-            return value
+            log("Generating cipher (salt length: \(factor) bytes)...")
         }
+        try generator.generate(outputDirectory: outputDir)
+
+        let effectiveOutput: String
+        if let dir = outputDir {
+            effectiveOutput = dir
+        } else {
+            effectiveOutput = loadedConfig.output.isEmpty ? "./" : loadedConfig.output
+        }
+        log("Writing SecretKeys.swift to \(effectiveOutput)")
+        print("Generated SecretKeys.swift at \(effectiveOutput)")
     }
-    
-    func isEnvironment(_ value: String) -> Bool {
-        return Regex("\\$\\{(\\w{1,})\\}").matches(value)
+
+    private func log(_ message: String) {
+        guard verbose else { return }
+        let data = Data(("[sskeys] " + message + "\n").utf8)
+        FileHandle.standardError.write(data)
     }
 }
